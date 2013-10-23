@@ -51,7 +51,6 @@ func AppendKey(parent string, child string, db *levigo.DB){
     val = fmt.Sprintf("%s,%s", val, childKeyName)
     abkleveldb.PushKeyVal(parentKeyName, val, db)
   }
-  fmt.Printf("%s => %s\n", parentKeyName, val)
 }
 
 func CreateNS(key string, db *levigo.DB){
