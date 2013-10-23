@@ -27,7 +27,6 @@ func PushKeyVal(key string, val string, db *levigo.DB) bool{
 
   keyname := []byte(key)
   value := []byte(val)
-  fmt.Printf("Writing for %s = %s\n", key, val)
   err := db.Put(writer, keyname, value)
   if err != nil {
     boohoo("Key " + key + " insertion failed. It's value was " + val, false)
