@@ -29,98 +29,100 @@ Set of Key:Val sent to KeyVal Store
 
 Representation at KeyVal Store
 
->
-> ~> a
->
-> key::a      =>  (/)
-> val::a      =>  A
->
+```ASCII
 
->
-> ~> a:1
->
-> key::a      =>  a:1
-> val::a      =>  A
-> key::a:1    =>  (/)
-> val::a:1    =>  A1
->
+ ~> a
+
+ key::a      =>  (/)
+ val::a      =>  A
 
 
->
-> ~> a:2
->
-> key::a      =>  a:1,a:2
-> val::a      =>  A
-> key::a:1    =>  (/)
-> val::a:1    =>  A1
-> key::a:2    =>  (/)
-> val::a:2    =>  A2
->
+
+ ~> a:1
+
+ key::a      =>  a:1
+ val::a      =>  A
+ key::a:1    =>  (/)
+ val::a:1    =>  A1
 
 
->
-> ~> a:3
->
-> key::a      =>  a:1,a:2,a:3
-> val::a      =>  A
-> key::a:1    =>  (/)
-> val::a:1    =>  A1
-> key::a:2    =>  (/)
-> val::a:2    =>  A2
-> key::a:3    =>  (/)
-> val::a:3    =>  A3
->
 
 
->
-> ~> a:1:2
->
-> key::a      =>  a:1,a:2,a:3
-> val::a      =>  A
-> key::a:1    =>  a:1:2
-> val::a:1    =>  A1
-> key::a:2    =>  (/)
-> val::a:2    =>  A2
-> key::a:3    =>  (/)
-> val::a:3    =>  A3
-> key::a:1:2  =>  (/)
-> val::a:1:2  =>  A12
->
+ ~> a:2
+
+ key::a      =>  a:1,a:2
+ val::a      =>  A
+ key::a:1    =>  (/)
+ val::a:1    =>  A1
+ key::a:2    =>  (/)
+ val::a:2    =>  A2
 
 
->
-> ~> a:2:1
->
-> key::a      =>  a:1,a:2,a:3
-> val::a      =>  A
-> key::a:1    =>  a:1:2
-> val::a:1    =>  A1
-> key::a:2    =>  a:2:1
-> val::a:2    =>  A2
-> key::a:3    =>  (/)
-> val::a:3    =>  A3
-> key::a:1:2  =>  (/)
-> val::a:1:2  =>  A12
-> key::a:2:1  =>  (/)
-> val::a:2:1  =>  A21
->
 
 
->
-> ~> a:1:1
->
-> key::a      =>  a:1,a:2,a:3
-> val::a      =>  A
-> key::a:1    =>  a:1:2,a:1:1
-> val::a:1    =>  A1
-> key::a:2    =>  a:2:1
-> val::a:2    =>  A2
-> key::a:3    =>  (/)
-> val::a:3    =>  A3
-> key::a:1:2  =>  (/)
-> val::a:1:2  =>  A12
-> key::a:2:1  =>  (/)
-> val::a:2:1  =>  A21
-> key::a:1:1  =>  (/)
-> val::a:1:1  =>  A11
->
+ ~> a:3
+
+ key::a      =>  a:1,a:2,a:3
+ val::a      =>  A
+ key::a:1    =>  (/)
+ val::a:1    =>  A1
+ key::a:2    =>  (/)
+ val::a:2    =>  A2
+ key::a:3    =>  (/)
+ val::a:3    =>  A3
+
+
+
+
+ ~> a:1:2
+
+ key::a      =>  a:1,a:2,a:3
+ val::a      =>  A
+ key::a:1    =>  a:1:2
+ val::a:1    =>  A1
+ key::a:2    =>  (/)
+ val::a:2    =>  A2
+ key::a:3    =>  (/)
+ val::a:3    =>  A3
+ key::a:1:2  =>  (/)
+ val::a:1:2  =>  A12
+
+
+
+
+ ~> a:2:1
+
+ key::a      =>  a:1,a:2,a:3
+ val::a      =>  A
+ key::a:1    =>  a:1:2
+ val::a:1    =>  A1
+ key::a:2    =>  a:2:1
+ val::a:2    =>  A2
+ key::a:3    =>  (/)
+ val::a:3    =>  A3
+ key::a:1:2  =>  (/)
+ val::a:1:2  =>  A12
+ key::a:2:1  =>  (/)
+ val::a:2:1  =>  A21
+
+
+
+
+ ~> a:1:1
+
+ key::a      =>  a:1,a:2,a:3
+ val::a      =>  A
+ key::a:1    =>  a:1:2,a:1:1
+ val::a:1    =>  A1
+ key::a:2    =>  a:2:1
+ val::a:2    =>  A2
+ key::a:3    =>  (/)
+ val::a:3    =>  A3
+ key::a:1:2  =>  (/)
+ val::a:1:2  =>  A12
+ key::a:2:1  =>  (/)
+ val::a:2:1  =>  A21
+ key::a:1:1  =>  (/)
+ val::a:1:1  =>  A11
+
+```
