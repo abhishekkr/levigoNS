@@ -25,8 +25,8 @@ func EverySecondOfHour(hour int, check string, db *levigo.DB) {
       val = "down"
     }
     lns.PushNS(nukey, val, db)
-fmt.Printf("%s, ", nukey) /*temp*/
   }
+  fmt.Printf("Hour %s done. Enter 'yes' anytime to end Push action.", hour)
 }
 
 func WriteMap(db *levigo.DB){
@@ -36,9 +36,9 @@ func WriteMap(db *levigo.DB){
   for {
     for {
       var quit string
-      fmt.Scanf("%d", &quit)
+      fmt.Scanf("%s", &quit)
       if quit == "y" || quit == "yes" {
-        break
+        return
       }
     }
     time.Sleep(10 * time.Second)
@@ -56,10 +56,16 @@ func ReadMap(key string, db *levigo.DB){
 }
 
 func main(){
+  start_time := time.Now()
   runtime.GOMAXPROCS(runtime.NumCPU())
   var db *levigo.DB
   fmt.Println("Your DB is referenced at", *dbpath)
+  create_start_time := time.Now()
   db = abkleveldb.CreateDB(*dbpath)
   WriteMap(db)
+  read_start_time := time.Now()
   ReadMap("127.0.0.1:status:2013:10:26:12", db)
+  fmt.Printf("\n\nStatistics:\n\tStarted at: %q\n", start_time)
+  fmt.Printf("\tCreating DB: %q\n", create_start_time)
+  fmt.Printf("\tReading DB: %q\n\tRead For an Hour: %q\n", read_start_time, time.Now())
 }
