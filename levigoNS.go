@@ -18,6 +18,7 @@ var (
 func ReadNS(key string, db *levigo.DB) HashMap{
   var hmap HashMap
   hmap = make(HashMap)
+  key = "key::" + key
   val := abkleveldb.GetValues(key, db)
   if val == "" { return hmap }
   children := strings.Split(val, ",")
