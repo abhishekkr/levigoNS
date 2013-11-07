@@ -23,9 +23,35 @@ func ReadNS(key string, db *levigo.DB) HashMap{
   if val == "" { return hmap }
   children := strings.Split(val, ",")
   for _, child := range children {
-    childKey := "val::" + strings.Split(child, "key::")[1]
-    hmap[child] = abkleveldb.GetValues(childKey, db)
+    child_key := "val::" + strings.Split(child, "key::")[1]
+    child_val := abkleveldb.GetValues(child_key, db)
+    if child_val != "" { hmap[child] = child_val }
   }
+  return hmap
+}
+
+func ReadNSRecursive(key string, db *levigo.DB) HashMap{
+  var hmap HashMap
+  hmap = make(HashMap)
+
+  keyname := "key::" + key
+  valname := "val::" + key
+  keyname_val := abkleveldb.GetValues(keyname, db)
+  valname_val := abkleveldb.GetValues(valname, db)
+  if valname_val != "" { hmap[key] = valname_val }
+  if keyname_val == "" { return hmap }
+  children := strings.Split(keyname_val, ",")
+
+  for _, child_val_as_key := range children {
+    fmt.Println("child_val_as_key", child_val_as_key)
+    child_key := strings.Split(child_val_as_key, "key::")[1]
+    fmt.Println("child_key", child_key)
+    inhmap := ReadNSRecursive(child_key, db)
+    for inhmap_key, inhmap_val := range inhmap {
+      hmap[inhmap_key] = inhmap_val
+    }
+  }
+
   return hmap
 }
 
