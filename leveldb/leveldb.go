@@ -35,13 +35,22 @@ func PushKeyVal(key string, val string, db *levigo.DB) bool{
   return true
 }
 
-
 /* Get Key */
-func GetValues(key string, db *levigo.DB) string {
+func GetVal(key string, db *levigo.DB) string {
   reader := levigo.NewReadOptions()
   defer reader.Close()
 
   data, err := db.Get(reader, []byte(key))
   if err != nil { boohoo("Key " + key + " query failed.", false) }
   return string(data)
+}
+
+/* Del Key */
+func DelKey(key string, db *levigo.DB) bool {
+  writer := levigo.NewWriteOptions()
+  defer writer.Close()
+
+  err := db.Delete(writer, []byte(key))
+  if err != nil { boohoo("Key " + key + " query failed.", false) }
+  return true
 }

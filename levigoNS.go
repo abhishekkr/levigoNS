@@ -19,12 +19,12 @@ func ReadNS(key string, db *levigo.DB) HashMap{
   var hmap HashMap
   hmap = make(HashMap)
   key = "key::" + key
-  val := abkleveldb.GetValues(key, db)
+  val := abkleveldb.GetVal(key, db)
   if val == "" { return hmap }
   children := strings.Split(val, ",")
   for _, child := range children {
     child_key := "val::" + strings.Split(child, "key::")[1]
-    child_val := abkleveldb.GetValues(child_key, db)
+    child_val := abkleveldb.GetVal(child_key, db)
     if child_val != "" { hmap[child] = child_val }
   }
   return hmap
@@ -36,8 +36,8 @@ func ReadNSRecursive(key string, db *levigo.DB) HashMap{
 
   keyname := "key::" + key
   valname := "val::" + key
-  keyname_val := abkleveldb.GetValues(keyname, db)
-  valname_val := abkleveldb.GetValues(valname, db)
+  keyname_val := abkleveldb.GetVal(keyname, db)
+  valname_val := abkleveldb.GetVal(valname, db)
   if valname_val != "" { hmap[key] = valname_val }
   if keyname_val == "" { return hmap }
   children := strings.Split(keyname_val, ",")
@@ -69,7 +69,7 @@ func AppendKey(parent string, child string, db *levigo.DB){
   parentKeyName := fmt.Sprintf("key::%s", parent)
   childKeyName := fmt.Sprintf("key::%s:%s", parent, child)
 
-  val := abkleveldb.GetValues(parentKeyName, db)
+  val := abkleveldb.GetVal(parentKeyName, db)
   if val == "" {
     abkleveldb.PushKeyVal(parentKeyName, childKeyName, db)
   } else if IfChildExists(childKeyName, val) {
