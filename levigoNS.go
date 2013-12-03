@@ -166,13 +166,12 @@ func UnrootNS(key string, db *levigo.DB){
 Standard function to directly delete a child key-val and unroot it from parent.
 */
 func DeleteNSKey(key string, db *levigo.DB){
+  defer UnrootNS(key, db)
   self_val := "val::" + key
   abkleveldb.DelKey(self_val, db)
 
-  key = "key::" + key
-  abkleveldb.DelKey(key, db)
-
-  UnrootNS(key, db)
+  keyname := "key::" + key
+  abkleveldb.DelKey(keyname, db)
 }
 
 
@@ -180,12 +179,13 @@ func DeleteNSKey(key string, db *levigo.DB){
 Standard function to delete a namespace with all direct children and unroot it.
 */
 func DeleteNS(key string, db *levigo.DB){
+  defer UnrootNS(key, db)
   self_val := "val::" + key
   abkleveldb.DelKey(self_val, db)
 
-  key = "key::" + key
-  val := abkleveldb.GetVal(key, db)
-  abkleveldb.DelKey(key, db)
+  keyname := "key::" + key
+  val := abkleveldb.GetVal(keyname, db)
+  abkleveldb.DelKey(keyname, db)
 
   if val == "" { return }
   children := strings.Split(val, ",")
@@ -194,15 +194,14 @@ func DeleteNS(key string, db *levigo.DB){
     abkleveldb.DelKey(child_key, db)
     abkleveldb.DelKey(child_val, db)
   }
-
-  UnrootNS(key, db)
 }
 
 
 /*
 Standard function to delete a namespace with all children below and unroot it.
 */
-func DeleteNSRecusrive(key string, db *levigo.DB){
+func DeleteNSRecursive(key string, db *levigo.DB){
+  defer UnrootNS(key, db)
   keyname := "key::" + key
   valname := "val::" + key
   keyname_val := abkleveldb.GetVal(keyname, db)
@@ -213,8 +212,6 @@ func DeleteNSRecusrive(key string, db *levigo.DB){
   children := strings.Split(keyname_val, ",")
   for _, child_val_as_key := range children {
     child_key := strings.Split(child_val_as_key, "key::")[1]
-    DeleteNSRecusrive(child_key, db)
+    DeleteNSRecursive(child_key, db)
   }
-
-  UnrootNS(key, db)
 }
