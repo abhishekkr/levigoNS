@@ -6,11 +6,19 @@ import (
   "github.com/jmhodges/levigo"
 )
 
+
+/*
+Prints provided error message and panics if rise value is True.
+*/
 func boohoo(errstring string, rise bool){
   fmt.Println(errstring)
   if rise == true{ panic(errstring) }
 }
 
+
+/*
+Creates a db at provided pathname.
+*/
 func CreateDB(dbname string) (*levigo.DB) {
   opts := levigo.NewOptions()
   opts.SetCache(levigo.NewLRUCache(1<<10))
@@ -20,7 +28,9 @@ func CreateDB(dbname string) (*levigo.DB) {
   return db
 }
 
-/* Push KeyVal */
+/*
+Push KeyVal in provided DB handle.
+*/
 func PushKeyVal(key string, val string, db *levigo.DB) bool{
   writer := levigo.NewWriteOptions()
   defer writer.Close()
@@ -35,7 +45,9 @@ func PushKeyVal(key string, val string, db *levigo.DB) bool{
   return true
 }
 
-/* Get Key */
+/*
+Get Value of Key from provided db handle.
+*/
 func GetVal(key string, db *levigo.DB) string {
   reader := levigo.NewReadOptions()
   defer reader.Close()
@@ -45,7 +57,9 @@ func GetVal(key string, db *levigo.DB) string {
   return string(data)
 }
 
-/* Del Key */
+/*
+Del Key from provided DB handle.
+*/
 func DelKey(key string, db *levigo.DB) bool {
   writer := levigo.NewWriteOptions()
   defer writer.Close()
