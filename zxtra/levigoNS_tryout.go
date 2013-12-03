@@ -10,8 +10,14 @@ import (
   abkleveldb "github.com/abhishekkr/levigoNS/leveldb"
 )
 
+
+var (
+  separator = ":"
+)
+
 func Read(key string, db *levigo.DB) string{
-  val := abkleveldb.GetValues(key, db)
+  val := abkleveldb.GetVal(key, db)
+  fmt.Printf("for %s get %s\n", key, val)
   return val
 }
 
@@ -54,6 +60,24 @@ func ExampleNS(db *levigo.DB) {
   for k,v := range hmap {
     fmt.Printf("%s => %s", k, v)
   }
+
+  fmt.Println("read/delete~")
+  fmt.Printf("Recursive under a: %v\n", lns.ReadNSRecursive("a", db))
+  fmt.Println("before del a:1:2 ~ ", abkleveldb.GetVal("key::a:1", db) )
+  lns.DeleteNS("a:1:2", db)
+  fmt.Println("after del of a:1:2 ~ ", abkleveldb.GetVal("key::a:1", db) )
+  fmt.Printf("Recursive under a: %v\n", lns.ReadNSRecursive("a", db))
+  fmt.Println("before del a ~ ", abkleveldb.GetVal("key::a", db) )
+  lns.DeleteNSRecursive("a", db)
+  fmt.Println("after del a ~ ", abkleveldb.GetVal("key::a", db) )
+  fmt.Printf("Recursive under a: %v\n", lns.ReadNSRecursive("a", db))
+  fmt.Printf("Recursive under b: %v\n", lns.ReadNSRecursive("b", db))
+  fmt.Println("before del of b ~",  abkleveldb.GetVal("key::b", db) )
+  lns.DeleteNS("b", db)
+  fmt.Println("after del of b ~ ", abkleveldb.GetVal("key::b", db) )
+  fmt.Println("after del b:2 ~ ", abkleveldb.GetVal("key::b:2", db) )
+  fmt.Println("after del b:2:1 ~ ", abkleveldb.GetVal("key::b:2:1", db) )
+  fmt.Printf("Recursive under b: %v\n", lns.ReadNSRecursive("b", db))
 }
 
 func main(){
