@@ -153,7 +153,7 @@ func UnrootNS(key string, db *levigo.DB){
       _tmp_array_idx += 1
     }
   }
-  parent_keyname_val = strings.Join(_tmp_array[0:len(_tmp_array)-1], ":")
+  parent_keyname_val = strings.Join(_tmp_array[0:len(_tmp_array)-1], ",")
   if parent_keyname_val == "" {
     UnrootNS(parent_key, db)
   }
