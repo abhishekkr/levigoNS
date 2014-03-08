@@ -1,8 +1,6 @@
 package abkleveldb
 
 import (
-  "fmt"
-
   "github.com/jmhodges/levigo"
 
   golerror "github.com/abhishekkr/gol/golerror"
