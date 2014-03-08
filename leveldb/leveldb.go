@@ -4,16 +4,9 @@ import (
   "fmt"
 
   "github.com/jmhodges/levigo"
+
+  golerror "github.com/abhishekkr/gol/golerror"
 )
-
-
-/*
-Prints provided error message and panics if rise value is True.
-*/
-func boohoo(errstring string, rise bool){
-  fmt.Println(errstring)
-  if rise == true{ panic(errstring) }
-}
 
 
 /*
@@ -24,7 +17,7 @@ func CreateDB(dbname string) (*levigo.DB) {
   opts.SetCache(levigo.NewLRUCache(1<<10))
   opts.SetCreateIfMissing(true)
   db, err := levigo.Open(dbname, opts)
-  if err != nil { boohoo("DB " + dbname + " Creation failed.", true) }
+  if err != nil { golerror.Boohoo("DB " + dbname + " Creation failed.", true) }
   return db
 }
 
@@ -39,7 +32,7 @@ func PushKeyVal(key string, val string, db *levigo.DB) bool{
   value := []byte(val)
   err := db.Put(writer, keyname, value)
   if err != nil {
-    boohoo("Key " + key + " insertion failed. It's value was " + val, false)
+    golerror.Boohoo("Key " + key + " insertion failed. It's value was " + val, false)
     return false
   }
   return true
@@ -53,7 +46,10 @@ func GetVal(key string, db *levigo.DB) string {
   defer reader.Close()
 
   data, err := db.Get(reader, []byte(key))
-  if err != nil { boohoo("Key " + key + " query failed.", false) }
+  if err != nil {
+    golerror.Boohoo("Key " + key + " query failed.", false)
+    return ""
+  }
   return string(data)
 }
 
@@ -65,6 +61,9 @@ func DelKey(key string, db *levigo.DB) bool {
   defer writer.Close()
 
   err := db.Delete(writer, []byte(key))
-  if err != nil { boohoo("Key " + key + " query failed.", false) }
+  if err != nil {
+    golerror.Boohoo("Key " + key + " query failed.", false)
+    return false
+  }
   return true
 }
