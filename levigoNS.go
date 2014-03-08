@@ -75,7 +75,7 @@ Return:
   true if given keyname is present as child in group-val of child keynames
   false if not
 */
-func IfChildExists(childKey string, parentValue string) bool {
+func ifChildExists(childKey string, parentValue string) bool{
   children := strings.Split(parentValue, ",")
   for _, child := range children {
     if child == childKey {
@@ -100,7 +100,7 @@ func appendKey(parent string, child string, db *levigo.DB) bool{
     if ! abkleveldb.PushKeyVal(parentKeyName, childKeyName, db){
       status = false
     }
-  } else if IfChildExists(childKeyName, val) {
+  } else if ifChildExists(childKeyName, val) {
     if ! abkleveldb.PushKeyVal(parentKeyName, val, db){
       status = false
     }
