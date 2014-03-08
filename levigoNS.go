@@ -90,19 +90,27 @@ func IfChildExists(childKey string, parentValue string) bool {
 Given a parent keyname and child keyname,
 updates the group-val for child keynames of a parent keyname as required.
 */
-func AppendKey(parent string, child string, db *levigo.DB){
+func appendKey(parent string, child string, db *levigo.DB) bool{
   parentKeyName := fmt.Sprintf("key::%s", parent)
   childKeyName := fmt.Sprintf("key::%s:%s", parent, child)
+  status := true
 
   val := abkleveldb.GetVal(parentKeyName, db)
   if val == "" {
-    abkleveldb.PushKeyVal(parentKeyName, childKeyName, db)
+    if ! abkleveldb.PushKeyVal(parentKeyName, childKeyName, db){
+      status = false
+    }
   } else if IfChildExists(childKeyName, val) {
-    abkleveldb.PushKeyVal(parentKeyName, val, db)
+    if ! abkleveldb.PushKeyVal(parentKeyName, val, db){
+      status = false
+    }
   } else {
     val = fmt.Sprintf("%s,%s", val, childKeyName)
-    abkleveldb.PushKeyVal(parentKeyName, val, db)
+    if ! abkleveldb.PushKeyVal(parentKeyName, val, db){
+      status = false
+    }
   }
+  return status
 }
 
 
@@ -115,8 +123,9 @@ func CreateNS(key string, db *levigo.DB){
     parentKey := key[0:splitIndex]
     childKey := key[splitIndex+1:]
 
-    AppendKey(parentKey, childKey, db)
-    CreateNS(parentKey, db)
+    if appendKey(parentKey, childKey, db){
+      CreateNS(parentKey, db)
+    }
   }
 }
 
