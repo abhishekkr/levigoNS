@@ -7,9 +7,8 @@ import (
   "github.com/jmhodges/levigo"
 
   "github.com/abhishekkr/levigoNS/leveldb"
+  golhashmap "github.com/abhishekkr/gol/golhashmap"
 )
-
-type HashMap map[string]string
 
 var (
   separator = ":"
@@ -22,9 +21,9 @@ For e.g.:
   given keys a, a:b, a:b:1, a:b:2, a:b:2:3
   reads for a:b:1, a:b:2 if queried for a:b
 */
-func ReadNS(key string, db *levigo.DB) HashMap{
-  var hmap HashMap
-  hmap = make(HashMap)
+func ReadNS(key string, db *levigo.DB) golhashmap.HashMap{
+  var hmap golhashmap.HashMap
+  hmap = make(golhashmap.HashMap)
   key = "key::" + key
   val := abkleveldb.GetVal(key, db)
   if val == "" { return hmap }
@@ -44,9 +43,9 @@ For e.g.:
   given keys a, a:b, a:b:1, a:b:2, a:b:2:3
   reads for a:b:1, a:b:2, a:b:2:3 if queried for a:b
 */
-func ReadNSRecursive(key string, db *levigo.DB) HashMap{
-  var hmap HashMap
-  hmap = make(HashMap)
+func ReadNSRecursive(key string, db *levigo.DB) golhashmap.HashMap{
+  var hmap golhashmap.HashMap
+  hmap = make(golhashmap.HashMap)
 
   keyname := "key::" + key
   valname := "val::" + key
