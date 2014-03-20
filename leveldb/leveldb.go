@@ -1,6 +1,9 @@
 package abkleveldb
 
 import (
+  "fmt"
+  "os"
+
   "github.com/jmhodges/levigo"
 
   golerror "github.com/abhishekkr/gol/golerror"
@@ -8,16 +11,32 @@ import (
 
 
 /*
-Creates a db at provided pathname.
+Creates a db at provided dbpath.
 */
-func CreateDB(dbname string) (*levigo.DB) {
+func CreateDB(dbpath string) (*levigo.DB) {
   opts := levigo.NewOptions()
   opts.SetCache(levigo.NewLRUCache(1<<10))
   opts.SetCreateIfMissing(true)
-  db, err := levigo.Open(dbname, opts)
-  if err != nil { golerror.Boohoo("DB " + dbname + " Creation failed.", true) }
+  db, err := levigo.Open(dbpath, opts)
+  if err != nil {
+    err_msg := fmt.Sprintf("DB %s Creation failed. %q", dbpath, err)
+    golerror.Boohoo(err_msg, true)
+  }
   return db
 }
+
+
+/*
+Closing and Deleting a db given handle and dbpath.
+Useful in use and throw implementations. And also tests.
+*/
+func CloseAndDeleteDB(dbpath string, db *levigo.DB){
+  db.Close()
+  if os.RemoveAll(dbpath) != nil {
+    panic("Fail: Temporary DB files are still present at: " + dbpath)
+  }
+}
+
 
 /*
 Push KeyVal in provided DB handle.
@@ -36,6 +55,7 @@ func PushKeyVal(key string, val string, db *levigo.DB) bool{
   return true
 }
 
+
 /*
 Get Value of Key from provided db handle.
 */
@@ -50,6 +70,7 @@ func GetVal(key string, db *levigo.DB) string {
   }
   return string(data)
 }
+
 
 /*
 Del Key from provided DB handle.
