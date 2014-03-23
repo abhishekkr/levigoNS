@@ -10,6 +10,7 @@ import (
 
   abklevigoNS "github.com/abhishekkr/levigoNS"
   abkleveldb "github.com/abhishekkr/levigoNS/leveldb"
+  golhashmap "github.com/abhishekkr/gol/golhashmap"
 )
 
 var (
@@ -56,7 +57,7 @@ func ReadMap(key string, db *levigo.DB){
   }
 }
 
-func PrintMapRecursive(m abklevigoNS.HashMap){
+func PrintMapRecursive(m golhashmap.HashMap){
   for k,v := range m {
     fmt.Println("val for key:", k, v)
   }

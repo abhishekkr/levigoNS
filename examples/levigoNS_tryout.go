@@ -64,7 +64,7 @@ func ExampleNS(db *levigo.DB) {
   fmt.Println("read/delete~")
   fmt.Printf("Recursive under a: %v\n", lns.ReadNSRecursive("a", db))
   fmt.Println("before del a:1:2 ~ ", abkleveldb.GetVal("key::a:1", db) )
-  lns.DeleteNS("a:1:2", db)
+  lns.DeleteNSRecursive("a:1:2", db)
   fmt.Println("after del of a:1:2 ~ ", abkleveldb.GetVal("key::a:1", db) )
   fmt.Printf("Recursive under a: %v\n", lns.ReadNSRecursive("a", db))
   fmt.Println("before del a ~ ", abkleveldb.GetVal("key::a", db) )
