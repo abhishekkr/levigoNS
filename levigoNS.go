@@ -161,16 +161,24 @@ func UnrootNS(key string, db *levigo.DB) bool {
   _tmp_array_idx := 0
   for _, elem := range parent_keyname_val_elem {
     if elem != self_keyname {
+      if elem == "" { continue }
       _tmp_array[_tmp_array_idx] = elem
       _tmp_array_idx += 1
     }
   }
-  parent_keyname_val = strings.Join(_tmp_array[0:len(_tmp_array)-1], ",")
+
+  if _tmp_array_idx > 1 {
+    parent_keyname_val = strings.Join(_tmp_array[0:_tmp_array_idx-1], ",")
+  } else {
+    parent_keyname_val = _tmp_array[0]
+  }
+
   if parent_keyname_val == "" {
     status_parent_unroot = UnrootNS(parent_key, db)
   }
 
   status_parent_update = abkleveldb.PushKeyVal(parent_keyname, parent_keyname_val, db)
+
   return status_parent_unroot && status_parent_update
 }
 
@@ -195,14 +203,14 @@ func DeleteNSKey(key string, db *levigo.DB) bool {
 Private function to delete direct children of any keyname
 */
 func deleteNSChildren(val string, db *levigo.DB) bool {
+  status := true
   children := strings.Split(val, ",")
   for _, child_key := range children {
     child_val := "val::" + strings.Split(child_key, "key::")[1]
-    if abkleveldb.DelKey(child_key, db) {
-      return abkleveldb.DelKey(child_val, db)
-    }
+    status = status && abkleveldb.DelKey(child_key, db)
+    status = status && abkleveldb.DelKey(child_val, db)
   }
-  return false
+  return status
 }
 
 
@@ -214,8 +222,8 @@ func DeleteNS(key string, db *levigo.DB) bool {
   self_val := "val::" + key
   if abkleveldb.DelKey(self_val, db) {
     keyname := "key::" + key
+    val := abkleveldb.GetVal(keyname, db)
     if abkleveldb.DelKey(keyname, db) {
-      val := abkleveldb.GetVal(keyname, db)
       if val == "" { return true }
       return deleteNSChildren(val, db)
     }
@@ -227,13 +235,15 @@ func DeleteNS(key string, db *levigo.DB) bool {
 /*
 Private function to delete recursive children of any keyname
 */
-func deleteNSRecursiveChildren(keyname_val string, db *levigo.DB) bool {
+func deleteNSRecursiveChildren(val string, db *levigo.DB) bool {
+  if val == "" { return true }
   status := true
-  children := strings.Split(keyname_val, ",")
-  for _, child_val_as_key := range children {
-    child_key := strings.Split(child_val_as_key, "key::")[1]
-    _this_status := DeleteNSRecursive(child_key, db) //circular call [*WIP*] [*BEWARE*]
-    if status { status = _this_status }
+  children := strings.Split(val, ",")
+  for _, child_key := range children {
+    child_val := "val::" + strings.Split(child_key, "key::")[1]
+    status = status && deleteNSRecursiveChildren(abkleveldb.GetVal(child_key, db), db)
+    status = status && abkleveldb.DelKey(child_key, db)
+    status = status && abkleveldb.DelKey(child_val, db)
   }
   return status
 }
