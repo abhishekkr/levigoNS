@@ -48,7 +48,7 @@ if [[ $# -ne 1 ]]; then
   echo "Use it wisely..."
   echo "Install tall Go lib dependencies: '$0 deps'"
   echo "Run all Tests: '$0 test'"
-  return 1
+  exit 1
 
 elif [[ "$1" == "deps" ]]; then
   go_get_pkg
