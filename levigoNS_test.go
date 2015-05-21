@@ -2,10 +2,12 @@ package abklevigoNS
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/jmhodges/levigo"
 
+	golassert "github.com/abhishekkr/gol/golassert"
 	golhashmap "github.com/abhishekkr/gol/golhashmap"
 	abkleveldb "github.com/abhishekkr/levigoNS/leveldb"
 )
@@ -23,66 +25,72 @@ func setupTestData(db *levigo.DB) {
 }
 
 func TestReadNS(t *testing.T) {
-	_parent_key, _key := "abc", "abc:name"
-	expected_parent_key_val := "key::abc:name,ABC XYZ\n"
-	expected_key_val := "key::abc:name:first,ABC\nkey::abc:name:last,XYZ\n"
+	_parentKey, _key := "abc", "abc:name"
+	expectedParentKeyVal := "key::abc:name,ABC XYZ"
+	expectedKeyVal := "key::abc:name:first,ABC\nkey::abc:name:last,XYZ"
 
 	db := abkleveldb.CreateDB(dbpath)
 	setupTestData(db)
 
-	result_parent_key_val := golhashmap.Hashmap_to_csv(ReadNS(_parent_key, db))
-	result_key_val := golhashmap.Hashmap_to_csv(ReadNS(_key, db))
+	fmt.Printf("%q", ReadNS(_parentKey, db))
+	resultParentKeyVal := golhashmap.HashMapToCSV(ReadNS(_parentKey, db))
+	resultKeyVal := golhashmap.HashMapToCSV(ReadNS(_key, db))
 
-	if result_parent_key_val != expected_parent_key_val {
-		t.Error(fmt.Sprintf("Fail: ReadNS failed for getting descendents. Result: %q, Expected: %q.", result_parent_key_val, expected_parent_key_val))
-	}
-	if result_key_val != expected_key_val {
-		t.Error(fmt.Sprintf("Fail: ReadNS failed for getting descendents. Result: %q, Expected: %q.", result_key_val, expected_key_val))
-	}
+	golassert.AssertEqualStringArray(
+		strings.Split(expectedParentKeyVal, "\n"),
+		strings.Split(resultParentKeyVal, "\n"),
+	)
+	golassert.AssertEqualStringArray(
+		strings.Split(expectedKeyVal, "\n"),
+		strings.Split(resultKeyVal, "\n"),
+	)
 
 	abkleveldb.CloseAndDeleteDB(dbpath, db)
 }
 
 func TestReadNSRecursive(t *testing.T) {
-	_parent_key, _key, _child_key := "abc", "abc:name", "abc:name:last"
-	expected_parent_key_val := "abc:name,ABC XYZ\nabc:name:first,ABC\nabc:name:last,XYZ\n"
-	expected_key_val := "abc:name,ABC XYZ\nabc:name:first,ABC\nabc:name:last,XYZ\n"
-	expected_child_key_val := "abc:name:last,XYZ\n"
+	_parentKey, _key, _childKey := "abc", "abc:name", "abc:name:last"
+	expectedParentKeyVal := "abc:name,ABC XYZ\nabc:name:first,ABC\nabc:name:last,XYZ"
+	expectedKeyVal := "abc:name,ABC XYZ\nabc:name:first,ABC\nabc:name:last,XYZ"
+	expectedChildKeyVal := "abc:name:last,XYZ"
 
 	db := abkleveldb.CreateDB(dbpath)
 	setupTestData(db)
 
-	result_parent_key_val := golhashmap.Hashmap_to_csv(ReadNSRecursive(_parent_key, db))
-	result_key_val := golhashmap.Hashmap_to_csv(ReadNSRecursive(_key, db))
-	result_child_key_val := golhashmap.Hashmap_to_csv(ReadNSRecursive(_child_key, db))
+	resultParentKeyVal := golhashmap.HashMapToCSV(ReadNSRecursive(_parentKey, db))
+	resultKeyVal := golhashmap.HashMapToCSV(ReadNSRecursive(_key, db))
+	resultChildKeyVal := golhashmap.HashMapToCSV(ReadNSRecursive(_childKey, db))
 
-	if result_parent_key_val != expected_parent_key_val {
-		t.Error(fmt.Sprintf("Fail: ReadNS failed for getting descendents. Result: %q, Expected: %q.", result_parent_key_val, expected_parent_key_val))
-	}
-	if result_key_val != expected_key_val {
-		t.Error(fmt.Sprintf("Fail: ReadNS failed for getting descendents. Result: %q, Expected: %q.", result_key_val, expected_key_val))
-	}
-	if result_child_key_val != expected_child_key_val {
-		t.Error(fmt.Sprintf("Fail: ReadNS failed for getting descendents. Result: %q, Expected: %q.", result_child_key_val, expected_child_key_val))
-	}
+	golassert.AssertEqualStringArray(
+		strings.Split(expectedParentKeyVal, "\n"),
+		strings.Split(resultParentKeyVal, "\n"),
+	)
+	golassert.AssertEqualStringArray(
+		strings.Split(expectedKeyVal, "\n"),
+		strings.Split(resultKeyVal, "\n"),
+	)
+	golassert.AssertEqualStringArray(
+		strings.Split(expectedChildKeyVal, "\n"),
+		strings.Split(resultChildKeyVal, "\n"),
+	)
 
 	abkleveldb.CloseAndDeleteDB(dbpath, db)
 }
 
 func TestIfChildExists(t *testing.T) {
-	_parent_key_value := "key::abc:name"
-	_parent_key_child := "key::abc:name"
-	_key_value := "key::abc:name:first,key::abc:name:last"
-	_key_child := "key::abc:name:first"
+	_parentKeyValue := "key::abc:name"
+	_parentKeyChild := "key::abc:name"
+	_keyValue := "key::abc:name:first,key::abc:name:last"
+	_keyChild := "key::abc:name:first"
 
-	if ifChildExists(_parent_key_child, _parent_key_value) != true {
-		t.Error(fmt.Sprintf("Fail: ifChildExists thinks %s is not child-key of %s", _parent_key_child, _parent_key_value))
+	if ifChildExists(_parentKeyChild, _parentKeyValue) != true {
+		t.Error(fmt.Sprintf("Fail: ifChildExists thinks %s is not child-key of %s", _parentKeyChild, _parentKeyValue))
 	}
-	if ifChildExists(_key_child, _key_value) != true {
-		t.Error(fmt.Sprintf("Fail: ifChildExists thinks %s is not child-key of %s", _key_child, _key_value))
+	if ifChildExists(_keyChild, _keyValue) != true {
+		t.Error(fmt.Sprintf("Fail: ifChildExists thinks %s is not child-key of %s", _keyChild, _keyValue))
 	}
-	if ifChildExists(_parent_key_child, _key_value) != false {
-		t.Error(fmt.Sprintf("Fail: ifChildExists thinks %s is child-key of %s", _parent_key_child, _key_value))
+	if ifChildExists(_parentKeyChild, _keyValue) != false {
+		t.Error(fmt.Sprintf("Fail: ifChildExists thinks %s is child-key of %s", _parentKeyChild, _keyValue))
 	}
 }
 
@@ -90,33 +98,33 @@ func TestAppendKey(t *testing.T) {
 	db := abkleveldb.CreateDB(dbpath)
 
 	status := appendKey("abc:name:first", "title", db)
-	expected_val := "key::abc:name:first:title"
-	result_val := abkleveldb.GetVal("key::abc:name:first", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal := "key::abc:name:first:title"
+	resultVal := abkleveldb.GetVal("key::abc:name:first", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 	if !status {
-		t.Error("Fail: Failed Status for", expected_val)
+		t.Error("Fail: Failed Status for", expectedVal)
 	}
 
 	status = appendKey("abc", "name", db)
-	expected_val = "key::abc:name"
-	result_val = abkleveldb.GetVal("key::abc", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal = "key::abc:name"
+	resultVal = abkleveldb.GetVal("key::abc", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 	if !status {
-		t.Error("Fail: Failed Status for", expected_val)
+		t.Error("Fail: Failed Status for", expectedVal)
 	}
 
 	status = appendKey("abc", "age", db)
-	expected_val = "key::abc:name,key::abc:age"
-	result_val = abkleveldb.GetVal("key::abc", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal = "key::abc:name,key::abc:age"
+	resultVal = abkleveldb.GetVal("key::abc", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 	if !status {
-		t.Error("Fail: Failed Status for", expected_val)
+		t.Error("Fail: Failed Status for", expectedVal)
 	}
 
 	abkleveldb.CloseAndDeleteDB(dbpath, db)
@@ -126,33 +134,33 @@ func TestCreateNS(t *testing.T) {
 	db := abkleveldb.CreateDB(dbpath)
 
 	status := CreateNS("abc:name:first", db)
-	expected_val := "key::abc:name:first"
-	result_val := abkleveldb.GetVal("key::abc:name", db)
-	if expected_val != result_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal := "key::abc:name:first"
+	resultVal := abkleveldb.GetVal("key::abc:name", db)
+	if expectedVal != resultVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 	if !status {
-		t.Error("Fail: Failed Status for", expected_val)
+		t.Error("Fail: Failed Status for", expectedVal)
 	}
 
 	status = CreateNS("abc:name:last", db)
-	expected_val = "key::abc:name:first,key::abc:name:last"
-	result_val = abkleveldb.GetVal("key::abc:name", db)
-	if expected_val != result_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal = "key::abc:name:first,key::abc:name:last"
+	resultVal = abkleveldb.GetVal("key::abc:name", db)
+	if expectedVal != resultVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 	if !status {
-		t.Error("Fail: Failed Status for", expected_val)
+		t.Error("Fail: Failed Status for", expectedVal)
 	}
 
 	status = CreateNS("abc:name:last", db)
-	expected_val = "key::abc:name:first,key::abc:name:last"
-	result_val = abkleveldb.GetVal("key::abc:name", db)
-	if expected_val != result_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal = "key::abc:name:first,key::abc:name:last"
+	resultVal = abkleveldb.GetVal("key::abc:name", db)
+	if expectedVal != resultVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 	if !status {
-		t.Error("Fail: Failed Status for", expected_val)
+		t.Error("Fail: Failed Status for", expectedVal)
 	}
 
 	abkleveldb.CloseAndDeleteDB(dbpath, db)
@@ -162,19 +170,19 @@ func TestPushNS(t *testing.T) {
 	db := abkleveldb.CreateDB(dbpath)
 
 	status := PushNS("abc:name", "ABC XYZ", db)
-	expected_val := "ABC XYZ"
-	result_val := abkleveldb.GetVal("val::abc:name", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal := "ABC XYZ"
+	resultVal := abkleveldb.GetVal("val::abc:name", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 	if !status {
-		t.Error("Fail: Failed Status for", expected_val)
+		t.Error("Fail: Failed Status for", expectedVal)
 	}
 
-	expected_val = "key::abc:name"
-	result_val = abkleveldb.GetVal("key::abc", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal = "key::abc:name"
+	resultVal = abkleveldb.GetVal("key::abc", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 
 	abkleveldb.CloseAndDeleteDB(dbpath, db)
@@ -185,52 +193,52 @@ func TestUnrootNS(t *testing.T) {
 	setupTestData(db)
 
 	status := UnrootNS("abc:name:first", db)
-	expected_val := "key::abc:name:last"
-	result_val := abkleveldb.GetVal("key::abc:name", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal := "key::abc:name:last"
+	resultVal := abkleveldb.GetVal("key::abc:name", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 	if !status {
-		t.Error("Fail: Failed Status for", expected_val)
+		t.Error("Fail: Failed Status for", expectedVal)
 	}
 
 	status = UnrootNS("abc:name:first", db)
-	expected_val = "key::abc:name:last"
-	result_val = abkleveldb.GetVal("key::abc:name", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal = "key::abc:name:last"
+	resultVal = abkleveldb.GetVal("key::abc:name", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 	if !status {
-		t.Error("Fail: Failed Status for", expected_val)
+		t.Error("Fail: Failed Status for", expectedVal)
 	}
 
 	status = UnrootNS("abc:name:none", db)
-	expected_val = "key::abc:name:last"
-	result_val = abkleveldb.GetVal("key::abc:name", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal = "key::abc:name:last"
+	resultVal = abkleveldb.GetVal("key::abc:name", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 	if !status {
-		t.Error("Fail: Failed Status for", expected_val)
+		t.Error("Fail: Failed Status for", expectedVal)
 	}
 
 	status = UnrootNS("abc:name:last", db)
-	expected_val = ""
-	result_val = abkleveldb.GetVal("key::abc:name", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal = ""
+	resultVal = abkleveldb.GetVal("key::abc:name", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 	if !status {
-		t.Error("Fail: Failed Status for", expected_val)
+		t.Error("Fail: Failed Status for", expectedVal)
 	}
 
-	expected_val = ""
-	result_val = abkleveldb.GetVal("key::abc", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal = ""
+	resultVal = abkleveldb.GetVal("key::abc", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 	if !status {
-		t.Error("Fail: Failed Status for", expected_val)
+		t.Error("Fail: Failed Status for", expectedVal)
 	}
 
 	abkleveldb.CloseAndDeleteDB(dbpath, db)
@@ -242,19 +250,19 @@ func TestDeleteNSKey(t *testing.T) {
 
 	status := DeleteNSKey("abc:name:last", db)
 
-	expected_val := ""
-	result_val := abkleveldb.GetVal("val::abc:name:last", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal := ""
+	resultVal := abkleveldb.GetVal("val::abc:name:last", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 	if !status {
-		t.Error("Fail: Failed Status for", expected_val)
+		t.Error("Fail: Failed Status for", expectedVal)
 	}
 
-	expected_val = "ABC"
-	result_val = abkleveldb.GetVal("val::abc:name:first", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal = "ABC"
+	resultVal = abkleveldb.GetVal("val::abc:name:first", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 
 	status = DeleteNSKey("abc:name:last", db)
@@ -269,42 +277,42 @@ func TestDeleteNSChildren(t *testing.T) {
 	db := abkleveldb.CreateDB(dbpath)
 	setupTestData(db)
 
-	expected_val := "ABC XYZ"
-	result_val := abkleveldb.GetVal("val::abc:name", db)
-	if result_val != expected_val {
+	expectedVal := "ABC XYZ"
+	resultVal := abkleveldb.GetVal("val::abc:name", db)
+	if resultVal != expectedVal {
 		t.Error("Fail: Pre-req is bad.")
 	}
 
 	status := deleteNSChildren("key::abc:name", db)
-	expected_val = ""
-	result_val = abkleveldb.GetVal("val::abc:name", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal = ""
+	resultVal = abkleveldb.GetVal("val::abc:name", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 	if !status {
-		t.Error("Fail: Failed Status for", expected_val)
+		t.Error("Fail: Failed Status for", expectedVal)
 	}
 
-	expected_val = ""
-	result_val = abkleveldb.GetVal("key::abc:name", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal = ""
+	resultVal = abkleveldb.GetVal("key::abc:name", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 
-	expected_val = "XYZ"
-	result_val = abkleveldb.GetVal("val::abc:name:last", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal = "XYZ"
+	resultVal = abkleveldb.GetVal("val::abc:name:last", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 
 	status = deleteNSChildren("key::abc:name:first,key::abc:name:last", db)
-	expected_val = ""
-	result_val = abkleveldb.GetVal("val::abc:name:first", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal = ""
+	resultVal = abkleveldb.GetVal("val::abc:name:first", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 	if !status {
-		t.Error("Fail: Failed Status for", expected_val)
+		t.Error("Fail: Failed Status for", expectedVal)
 	}
 
 	abkleveldb.CloseAndDeleteDB(dbpath, db)
@@ -315,25 +323,25 @@ func TestDeleteNS(t *testing.T) {
 	setupTestData(db)
 
 	status := DeleteNS("abc", db)
-	expected_val := ""
-	result_val := abkleveldb.GetVal("val::abc", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal := ""
+	resultVal := abkleveldb.GetVal("val::abc", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 	if !status {
-		t.Error("Fail: Failed Status for", expected_val)
+		t.Error("Fail: Failed Status for", expectedVal)
 	}
 
-	expected_val = ""
-	result_val = abkleveldb.GetVal("val::abc:name", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal = ""
+	resultVal = abkleveldb.GetVal("val::abc:name", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 
-	expected_val = "XYZ"
-	result_val = abkleveldb.GetVal("val::abc:name:last", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal = "XYZ"
+	resultVal = abkleveldb.GetVal("val::abc:name:last", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 
 	abkleveldb.CloseAndDeleteDB(dbpath, db)
@@ -344,35 +352,35 @@ func TestDeleteNSRecursiveChildren(t *testing.T) {
 	setupTestData(db)
 
 	status := deleteNSRecursiveChildren("key::abc:name:first", db)
-	expected_val := ""
-	result_val := abkleveldb.GetVal("val::abc:name:first", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal := ""
+	resultVal := abkleveldb.GetVal("val::abc:name:first", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 	if !status {
-		t.Error("Fail: Failed Status for", expected_val)
+		t.Error("Fail: Failed Status for", expectedVal)
 	}
 
 	status = deleteNSRecursiveChildren("key::abc", db)
-	expected_val = ""
-	result_val = abkleveldb.GetVal("key::abc", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal = ""
+	resultVal = abkleveldb.GetVal("key::abc", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 	if !status {
-		t.Error("Fail: Failed Status for", expected_val)
+		t.Error("Fail: Failed Status for", expectedVal)
 	}
 
-	expected_val = ""
-	result_val = abkleveldb.GetVal("key::abc:name", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal = ""
+	resultVal = abkleveldb.GetVal("key::abc:name", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 
-	expected_val = ""
-	result_val = abkleveldb.GetVal("val::abc:name:last", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal = ""
+	resultVal = abkleveldb.GetVal("val::abc:name:last", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 
 	abkleveldb.CloseAndDeleteDB(dbpath, db)
@@ -384,31 +392,31 @@ func TestDeleteNSRecursive(t *testing.T) {
 
 	status := DeleteNSRecursive("abc", db)
 
-	expected_val := ""
-	result_val := abkleveldb.GetVal("key::abc", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal := ""
+	resultVal := abkleveldb.GetVal("key::abc", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 	if !status {
-		t.Error("Fail: Failed Status for", expected_val)
+		t.Error("Fail: Failed Status for", expectedVal)
 	}
 
-	expected_val = ""
-	result_val = abkleveldb.GetVal("key::abc:name", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal = ""
+	resultVal = abkleveldb.GetVal("key::abc:name", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 
-	expected_val = ""
-	result_val = abkleveldb.GetVal("val::abc:name:first", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal = ""
+	resultVal = abkleveldb.GetVal("val::abc:name:first", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 
-	expected_val = ""
-	result_val = abkleveldb.GetVal("val::abc:name:last", db)
-	if result_val != expected_val {
-		t.Error("Fail: Get", result_val, "instead of", expected_val)
+	expectedVal = ""
+	resultVal = abkleveldb.GetVal("val::abc:name:last", db)
+	if resultVal != expectedVal {
+		t.Error("Fail: Get", resultVal, "instead of", expectedVal)
 	}
 
 	abkleveldb.CloseAndDeleteDB(dbpath, db)

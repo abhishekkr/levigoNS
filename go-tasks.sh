@@ -54,8 +54,10 @@ elif [[ "$1" == "deps" ]]; then
   go_get_pkg
 
 elif [[ "$1" == "test" ]]; then
+  rm -rf /tmp/delete-this-leveldb
+  rm -rf /tmp/delete-this-levigoNS
   go test .
-  go test leveldb/.
+  go test ./leveldb/.
 
 fi
 
