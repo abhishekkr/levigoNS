@@ -54,7 +54,8 @@ elif [[ "$1" == "deps" ]]; then
   go_get_pkg
 
 elif [[ "$1" == "test" ]]; then
-  go test ./...
+  go test .
+  go test leveldb/.
 
 fi
 
