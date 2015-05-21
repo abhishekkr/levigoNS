@@ -10,12 +10,14 @@ import (
 	"github.com/abhishekkr/levigoNS/leveldb"
 )
 
+/* NameSpaceSeparator could be modified if something other than colon-char ":"
+is to be used as separator symbol for NameSpace. */
 var (
 	NamespaceSeparator = ":"
 )
 
 /*
-Reads all direct child values in a given NameSpace
+ReadNS reads all direct child values in a given NameSpace
 For e.g.:
   given keys a, a:b, a:b:1, a:b:2, a:b:2:3
   reads for a:b:1, a:b:2 if queried for a:b
@@ -30,17 +32,17 @@ func ReadNS(key string, db *levigo.DB) golhashmap.HashMap {
 	}
 	children := strings.Split(val, ",")
 	for _, child := range children {
-		child_key := "val::" + strings.Split(child, "key::")[1]
-		child_val := abkleveldb.GetVal(child_key, db)
-		if child_val != "" {
-			hmap[child] = child_val
+		childKey := "val::" + strings.Split(child, "key::")[1]
+		childVal := abkleveldb.GetVal(childKey, db)
+		if childVal != "" {
+			hmap[child] = childVal
 		}
 	}
 	return hmap
 }
 
 /*
-Reads all values belonging to tree below given NameSpace
+ReadNSRecursive reads all values belonging to tree below given NameSpace
 For e.g.:
   given keys a, a:b, a:b:1, a:b:2, a:b:2:3
   reads for a:b:1, a:b:2, a:b:2:3 if queried for a:b
@@ -51,21 +53,21 @@ func ReadNSRecursive(key string, db *levigo.DB) golhashmap.HashMap {
 
 	keyname := "key::" + key
 	valname := "val::" + key
-	keyname_val := abkleveldb.GetVal(keyname, db)
-	valname_val := abkleveldb.GetVal(valname, db)
-	if valname_val != "" {
-		hmap[key] = valname_val
+	keynameVal := abkleveldb.GetVal(keyname, db)
+	valnameVal := abkleveldb.GetVal(valname, db)
+	if valnameVal != "" {
+		hmap[key] = valnameVal
 	}
-	if keyname_val == "" {
+	if keynameVal == "" {
 		return hmap
 	}
-	children := strings.Split(keyname_val, ",")
+	children := strings.Split(keynameVal, ",")
 
-	for _, child_val_as_key := range children {
-		child_key := strings.Split(child_val_as_key, "key::")[1]
-		inhmap := ReadNSRecursive(child_key, db)
-		for inhmap_key, inhmap_val := range inhmap {
-			hmap[inhmap_key] = inhmap_val
+	for _, childValAsKey := range children {
+		childKey := strings.Split(childValAsKey, "key::")[1]
+		inhmap := ReadNSRecursive(childKey, db)
+		for inHmapKey, inHmapVal := range inhmap {
+			hmap[inHmapKey] = inHmapVal
 		}
 	}
 
@@ -91,8 +93,9 @@ func ifChildExists(childKey string, parentValue string) bool {
 }
 
 /*
-Given a parent keyname and child keyname,
-updates the group-val for child keynames of a parent keyname as required.
+appendKey updates the group-val for child keynames
+of a parent keyname as required
+given a parent keyname and child keyname.
 */
 func appendKey(parent string, child string, db *levigo.DB) bool {
 	parentKeyName := fmt.Sprintf("key::%s", parent)
@@ -118,7 +121,8 @@ func appendKey(parent string, child string, db *levigo.DB) bool {
 }
 
 /*
-Given a keyname takes care of updating entry of all trail of NameSpaces.
+CreateNS updates entry with its trail of namespace
+given a keyname.
 */
 func CreateNS(key string, db *levigo.DB) bool {
 	splitIndex := strings.LastIndexAny(key, NamespaceSeparator)
@@ -128,15 +132,14 @@ func CreateNS(key string, db *levigo.DB) bool {
 
 		if appendKey(parentKey, childKey, db) {
 			return CreateNS(parentKey, db)
-		} else {
-			return false
 		}
+		return false
 	}
 	return true
 }
 
 /*
-Standard function to feed in NameSpace entries given namespace key and val.
+PushNS feeds in namespace entries given namespace key and val.
 */
 func PushNS(key string, val string, db *levigo.DB) bool {
 	CreateNS(key, db)
@@ -145,57 +148,57 @@ func PushNS(key string, val string, db *levigo.DB) bool {
 }
 
 /*
-Update key's presence from it's parent's  group-val of child key names.
+UnrootNS update key's presence from it's parent's  group-val of child key names.
 */
 func UnrootNS(key string, db *levigo.DB) bool {
-	status_parent_unroot, status_parent_update := true, true
-	split_index := strings.LastIndexAny(key, NamespaceSeparator)
-	if split_index < 0 {
+	statusParentUnroot, statusParentUpdate := true, true
+	splitIndex := strings.LastIndexAny(key, NamespaceSeparator)
+	if splitIndex < 0 {
 		return true
 	}
-	parent_key := key[0:split_index]
-	self_keyname := fmt.Sprintf("key::%s", key)
-	parent_keyname := fmt.Sprintf("key::%s", parent_key)
-	parent_keyname_val := abkleveldb.GetVal(parent_keyname, db)
-	if parent_keyname_val == "" {
+	parentKey := key[0:splitIndex]
+	selfKeyname := fmt.Sprintf("key::%s", key)
+	parentKeyname := fmt.Sprintf("key::%s", parentKey)
+	parentKeynameVal := abkleveldb.GetVal(parentKeyname, db)
+	if parentKeynameVal == "" {
 		return true
 	}
-	parent_keyname_val_elem := strings.Split(parent_keyname_val, ",")
+	parentKeynameValElem := strings.Split(parentKeynameVal, ",")
 
-	_tmp_array := make([]string, len(parent_keyname_val_elem))
-	_tmp_array_idx := 0
-	for _, elem := range parent_keyname_val_elem {
-		if elem != self_keyname {
+	_tmpArray := make([]string, len(parentKeynameValElem))
+	_tmpArrayIdx := 0
+	for _, elem := range parentKeynameValElem {
+		if elem != selfKeyname {
 			if elem == "" {
 				continue
 			}
-			_tmp_array[_tmp_array_idx] = elem
-			_tmp_array_idx += 1
+			_tmpArray[_tmpArrayIdx] = elem
+			_tmpArrayIdx++
 		}
 	}
 
-	if _tmp_array_idx > 1 {
-		parent_keyname_val = strings.Join(_tmp_array[0:_tmp_array_idx-1], ",")
+	if _tmpArrayIdx > 1 {
+		parentKeynameVal = strings.Join(_tmpArray[0:_tmpArrayIdx-1], ",")
 	} else {
-		parent_keyname_val = _tmp_array[0]
+		parentKeynameVal = _tmpArray[0]
 	}
 
-	if parent_keyname_val == "" {
-		status_parent_unroot = UnrootNS(parent_key, db)
+	if parentKeynameVal == "" {
+		statusParentUnroot = UnrootNS(parentKey, db)
 	}
 
-	status_parent_update = abkleveldb.PushKeyVal(parent_keyname, parent_keyname_val, db)
+	statusParentUpdate = abkleveldb.PushKeyVal(parentKeyname, parentKeynameVal, db)
 
-	return status_parent_unroot && status_parent_update
+	return statusParentUnroot && statusParentUpdate
 }
 
 /*
-Standard function to directly delete a child key-val and unroot it from parent.
+DeleteNSKey directly deletes a child key-val and unroot it from parent.
 */
 func DeleteNSKey(key string, db *levigo.DB) bool {
 	defer UnrootNS(key, db)
-	self_val := "val::" + key
-	if abkleveldb.DelKey(self_val, db) {
+	selfVal := "val::" + key
+	if abkleveldb.DelKey(selfVal, db) {
 		keyname := "key::" + key
 		if abkleveldb.DelKey(keyname, db) {
 			return true
@@ -205,26 +208,26 @@ func DeleteNSKey(key string, db *levigo.DB) bool {
 }
 
 /*
-Private function to delete direct children of any keyname
+deleteNSChildren deletes direct children of any keyname.
 */
 func deleteNSChildren(val string, db *levigo.DB) bool {
 	status := true
 	children := strings.Split(val, ",")
-	for _, child_key := range children {
-		child_val := "val::" + strings.Split(child_key, "key::")[1]
-		status = status && abkleveldb.DelKey(child_key, db)
-		status = status && abkleveldb.DelKey(child_val, db)
+	for _, childKey := range children {
+		childVal := "val::" + strings.Split(childKey, "key::")[1]
+		status = status && abkleveldb.DelKey(childKey, db)
+		status = status && abkleveldb.DelKey(childVal, db)
 	}
 	return status
 }
 
 /*
-Standard function to delete a namespace with all direct children and unroot it.
+DeleteNS deletes a namespace with all direct children and unroot it.
 */
 func DeleteNS(key string, db *levigo.DB) bool {
 	defer UnrootNS(key, db)
-	self_val := "val::" + key
-	if abkleveldb.DelKey(self_val, db) {
+	selfVal := "val::" + key
+	if abkleveldb.DelKey(selfVal, db) {
 		keyname := "key::" + key
 		val := abkleveldb.GetVal(keyname, db)
 		if abkleveldb.DelKey(keyname, db) {
@@ -238,7 +241,7 @@ func DeleteNS(key string, db *levigo.DB) bool {
 }
 
 /*
-Private function to delete recursive children of any keyname
+deleteNSRecursiveChildren deletes recursive children of any keyname.
 */
 func deleteNSRecursiveChildren(val string, db *levigo.DB) bool {
 	if val == "" {
@@ -246,30 +249,30 @@ func deleteNSRecursiveChildren(val string, db *levigo.DB) bool {
 	}
 	status := true
 	children := strings.Split(val, ",")
-	for _, child_key := range children {
-		child_val := "val::" + strings.Split(child_key, "key::")[1]
-		status = status && deleteNSRecursiveChildren(abkleveldb.GetVal(child_key, db), db)
-		status = status && abkleveldb.DelKey(child_key, db)
-		status = status && abkleveldb.DelKey(child_val, db)
+	for _, childKey := range children {
+		childVal := "val::" + strings.Split(childKey, "key::")[1]
+		status = status && deleteNSRecursiveChildren(abkleveldb.GetVal(childKey, db), db)
+		status = status && abkleveldb.DelKey(childKey, db)
+		status = status && abkleveldb.DelKey(childVal, db)
 	}
 	return status
 }
 
 /*
-Standard function to delete a namespace with all children below and unroot it.
+DeleteNSRecursive to delete a namespace with all children below and unroot it.
 */
 func DeleteNSRecursive(key string, db *levigo.DB) bool {
 	defer UnrootNS(key, db)
 	keyname := "key::" + key
 	valname := "val::" + key
-	keyname_val := abkleveldb.GetVal(keyname, db)
+	keynameVal := abkleveldb.GetVal(keyname, db)
 	if abkleveldb.DelKey(keyname, db) {
 		if abkleveldb.DelKey(valname, db) {
 
-			if keyname_val == "" {
+			if keynameVal == "" {
 				return true
 			}
-			return deleteNSRecursiveChildren(keyname_val, db)
+			return deleteNSRecursiveChildren(keynameVal, db)
 		}
 	}
 	return false
