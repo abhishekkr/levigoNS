@@ -37,28 +37,28 @@ func TestCloseAndDeleteDB(t *testing.T) {
 }
 
 func Test_PushKeyVal(t *testing.T) {
-	_key, expected_val := "name", "levigoNS"
+	_key, expectedVal := "name", "levigoNS"
 	dbpath := "/tmp/delete-this-leveldb"
 	db := CreateDB(dbpath)
 
-	PushKeyVal(_key, expected_val, db)
+	PushKeyVal(_key, expectedVal, db)
 
 	reader := levigo.NewReadOptions()
 	defer reader.Close()
 
-	result_val, err := db.Get(reader, []byte(_key))
+	resultVal, err := db.Get(reader, []byte(_key))
 
 	if err != nil {
 		t.Error("Fail: (PushKeyVal) Reading key " + _key + " failed")
 	}
-	if string(result_val) != expected_val {
-		t.Error("Fail: PushKeyVal sets " + expected_val + " & gets " + string(result_val))
+	if string(resultVal) != expectedVal {
+		t.Error("Fail: PushKeyVal sets " + expectedVal + " & gets " + string(resultVal))
 	}
 	CloseAndDeleteDB(dbpath, db)
 }
 
 func Test_GetValues(t *testing.T) {
-	_key, expected_val := "name", "levigoNS"
+	_key, expectedVal := "name", "levigoNS"
 	dbpath := "/tmp/delete-this-leveldb"
 	db := CreateDB(dbpath)
 
@@ -66,23 +66,23 @@ func Test_GetValues(t *testing.T) {
 	defer writer.Close()
 
 	keyname := []byte(_key)
-	value := []byte(expected_val)
+	value := []byte(expectedVal)
 	err := db.Put(writer, keyname, value)
 	if err != nil {
-		t.Error("Fail: (GetVal) Pushing key " + _key + " for value " + expected_val + " failed")
+		t.Error("Fail: (GetVal) Pushing key " + _key + " for value " + expectedVal + " failed")
 	}
 
-	result_val := GetVal(_key, db)
+	resultVal := GetVal(_key, db)
 
-	if result_val != expected_val {
-		t.Error("Fail: GetVal gets " + string(result_val) + " for set value " + expected_val)
+	if resultVal != expectedVal {
+		t.Error("Fail: GetVal gets " + string(resultVal) + " for set value " + expectedVal)
 	}
 
 	CloseAndDeleteDB(dbpath, db)
 }
 
 func Test_DelKey(t *testing.T) {
-	_key, _val, expected_val := "name", "levigoNS", ""
+	_key, _val, expectedVal := "name", "levigoNS", ""
 	dbpath := "/tmp/delete-this-leveldb"
 	db := CreateDB(dbpath)
 
@@ -96,19 +96,19 @@ func Test_DelKey(t *testing.T) {
 		t.Error("Fail: (DelKey) Pushing key " + _key + " for value " + _val + " failed")
 	}
 
-	status_delete := DelKey(_key, db)
+	statusDelete := DelKey(_key, db)
 
 	reader := levigo.NewReadOptions()
 	defer reader.Close()
 
-	result_val, err := db.Get(reader, []byte(_key))
+	resultVal, err := db.Get(reader, []byte(_key))
 	if err != nil {
 		t.Error("Fail: (DelKey) Reading key " + _key + " failed")
 	}
-	if string(result_val) != expected_val {
-		t.Error("Fail: DelKey sets " + string(result_val))
+	if string(resultVal) != expectedVal {
+		t.Error("Fail: DelKey sets " + string(resultVal))
 	}
-	if !status_delete {
+	if !statusDelete {
 		t.Error("Fail: DelKey returns False status")
 	}
 

@@ -10,7 +10,7 @@ import (
 )
 
 /*
-Creates a db at provided dbpath.
+CreateDB creates a db at provided dbpath.
 */
 func CreateDB(dbpath string) *levigo.DB {
 	opts := levigo.NewOptions()
@@ -18,14 +18,14 @@ func CreateDB(dbpath string) *levigo.DB {
 	opts.SetCreateIfMissing(true)
 	db, err := levigo.Open(dbpath, opts)
 	if err != nil {
-		err_msg := fmt.Sprintf("DB %s Creation failed. %q", dbpath, err)
-		golerror.Boohoo(err_msg, true)
+		errMsg := fmt.Sprintf("DB %s Creation failed. %q", dbpath, err)
+		golerror.Boohoo(errMsg, true)
 	}
 	return db
 }
 
 /*
-Closing and Deleting a db given handle and dbpath.
+CloseAndDeleteDB closes and deletes a db given handle and dbpath.
 Useful in use and throw implementations. And also tests.
 */
 func CloseAndDeleteDB(dbpath string, db *levigo.DB) {
@@ -36,7 +36,7 @@ func CloseAndDeleteDB(dbpath string, db *levigo.DB) {
 }
 
 /*
-Push KeyVal in provided DB handle.
+PushKeyVal push KeyVal in provided DB handle.
 */
 func PushKeyVal(key string, val string, db *levigo.DB) bool {
 	writer := levigo.NewWriteOptions()
@@ -53,7 +53,7 @@ func PushKeyVal(key string, val string, db *levigo.DB) bool {
 }
 
 /*
-Get Value of Key from provided db handle.
+GetVal gets value of Key from provided db handle.
 */
 func GetVal(key string, db *levigo.DB) string {
 	reader := levigo.NewReadOptions()
@@ -68,7 +68,7 @@ func GetVal(key string, db *levigo.DB) string {
 }
 
 /*
-Del Key from provided DB handle.
+DelKey deletes key from provided DB handle.
 */
 func DelKey(key string, db *levigo.DB) bool {
 	writer := levigo.NewWriteOptions()
