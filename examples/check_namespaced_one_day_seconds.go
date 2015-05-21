@@ -38,12 +38,10 @@ func witeMap(db *levigo.DB) {
 		go everySecondOfHour(hour, "status", db)
 	}
 	for {
-		for {
-			var quit string
-			fmt.Scanf("%s", &quit)
-			if quit == "y" || quit == "yes" {
-				return
-			}
+		var quit string
+		fmt.Scanf("%s", &quit)
+		if quit == "y" || quit == "yes" {
+			return
 		}
 		time.Sleep(10 * time.Second)
 	}
