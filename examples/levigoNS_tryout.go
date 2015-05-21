@@ -14,13 +14,13 @@ var (
 	separator = ":"
 )
 
-func Read(key string, db *levigo.DB) string {
+func read(key string, db *levigo.DB) string {
 	val := abkleveldb.GetVal(key, db)
 	fmt.Printf("for %s get %s\n", key, val)
 	return val
 }
 
-func ExampleNS(db *levigo.DB) {
+func exampleNS(db *levigo.DB) {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	fmt.Println("add some data first for a,a:1,a:2,a:1:2,a:2:1,a:3,a:1:1 ~")
@@ -34,20 +34,20 @@ func ExampleNS(db *levigo.DB) {
 	lns.PushNS("b:2:1", "A11", db)
 
 	fmt.Println("read some data now ~")
-	Read("val::a", db)
-	Read("val::a:1", db)
-	Read("val::a:2", db)
-	Read("val::a:1:2", db)
-	Read("val::a:2:1", db)
-	Read("val::a:3", db)
-	Read("val::a:1:1", db)
+	read("val::a", db)
+	read("val::a:1", db)
+	read("val::a:2", db)
+	read("val::a:1:2", db)
+	read("val::a:2:1", db)
+	read("val::a:3", db)
+	read("val::a:1:1", db)
 
 	fmt.Println("super keys~")
-	Read("key::a", db)
-	Read("key::a:1", db)
-	Read("key::a:2", db)
-	Read("key::b", db)
-	Read("key::b:2", db)
+	read("key::a", db)
+	read("key::a:1", db)
+	read("key::a:2", db)
+	read("key::b", db)
+	read("key::b:2", db)
 
 	var hmap map[string]string
 	hmap = make(map[string]string)
@@ -82,5 +82,5 @@ func ExampleNS(db *levigo.DB) {
 func main() {
 	var db *levigo.DB
 	db = abkleveldb.CreateDB("/tmp/LevelDB02")
-	ExampleNS(db)
+	exampleNS(db)
 }

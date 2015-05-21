@@ -66,23 +66,23 @@ func printMapRecursive(m golhashmap.HashMap) {
 }
 
 func main() {
-	start_time := time.Now()
+	startTime := time.Now()
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	var db *levigo.DB
 	fmt.Println("Your DB is referenced at", *dbpath)
-	create_start_time := time.Now()
+	createStartTime := time.Now()
 	db = abkleveldb.CreateDB(*dbpath)
 	witeMap(db)
 	fmt.Println("Writing is over.")
 	readMap("127.0.0.1:status:2013:10:26:12", db)
 	result := abklevigoNS.ReadNSRecursive("127.0.0.1:status", db)
-	read_start_time := time.Now()
+	readStartTime := time.Now()
 	printMapRecursive(result)
 	readMap("127.0.0.1:status:2013:10:26", db)
 	fmt.Println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-	fmt.Printf("\n\nStatistics:\n\tStarted at: %q\n", start_time)
-	fmt.Printf("\tCreating DB: %q\n", create_start_time)
-	fmt.Printf("\tReading DB: %q\n\tRead For an Hour: %q\n", read_start_time, time.Now())
+	fmt.Printf("\n\nStatistics:\n\tStarted at: %q\n", startTime)
+	fmt.Printf("\tCreating DB: %q\n", createStartTime)
+	fmt.Printf("\tReading DB: %q\n\tRead For an Hour: %q\n", readStartTime, time.Now())
 	fmt.Println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 	fmt.Println(len(result))
 }
